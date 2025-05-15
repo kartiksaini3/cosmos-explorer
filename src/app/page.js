@@ -2,6 +2,9 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Copy from "@/images/copy.svg";
+import { toast } from "react-toastify";
+import Image from "next/image";
 
 const FetchLast10 = () => {
   const [activeTab, setActiveTab] = useState("blocks");
@@ -30,6 +33,15 @@ const FetchLast10 = () => {
     };
     fetchData();
   }, [activeTab]);
+
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Copied to clipboard!", { type: "success" });
+    } catch (err) {
+      toast("Failed to copy", { type: "error" });
+    }
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -94,7 +106,14 @@ const FetchLast10 = () => {
               <p>
                 <strong>Raw Tx:</strong>{" "}
                 <code className="break-words text-sm">
-                  {tx.rawTx.slice(0, 1000)}
+                  {`${tx.rawTx.slice(0, 1000)}...`}
+                  <Image
+                    src={Copy}
+                    alt="Copy Icon"
+                    width={20}
+                    className="cursor-pointer invert"
+                    onClick={() => handleCopy(tx.rawTx)}
+                  />
                 </code>
               </p>
             </div>
