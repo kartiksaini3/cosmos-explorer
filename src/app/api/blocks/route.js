@@ -1,8 +1,24 @@
 import { ENV, HEADERS } from "@/utils/constants";
+import { Pool } from "pg";
 import axios from "axios";
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 export async function GET() {
+  const client = await pool.connect();
+
   try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS blocks (
+        height INTEGER PRIMARY KEY,
+        hash TEXT,
+        time TIMESTAMPTZ,
+        txs JSONB
+      );
+    `);
+
     const statusRes = await axios.post(
       ENV.RPC_ENDPOINT,
       {
@@ -17,35 +33,84 @@ export async function GET() {
     const latestHeight = parseInt(
       statusRes.data.result.sync_info.latest_block_height
     );
-    const blocks = [];
 
-    for (let i = 0; i < 10; i++) {
-      const height = latestHeight - i;
+    const dbRes = await client.query("SELECT MAX(height) AS max FROM blocks");
+    let startHeight = dbRes.rows[0].max;
 
+    // if (startHeight === null) {
+    //   startHeight = latestHeight - 9;
+    // }
+
+    const newBlocks = [];
+    let limit = 0;
+    let currentHeight = startHeight + 1;
+
+    while (currentHeight <= latestHeight && limit < 10) {
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
           jsonrpc: "2.0",
-          id: height,
+          id: currentHeight,
           method: "block",
-          params: { height: String(height) },
+          params: { height: String(currentHeight) },
         },
         { headers: HEADERS }
       );
 
-      blocks.push({
-        height,
-        hash: res.data.result.block_id.hash,
-        time: res.data.result.block.header.time,
-        txs: res.data.result.block.data.txs || [],
-      });
+      if (res.data?.error) {
+        const msg = res.data?.error?.data;
+        const match = msg?.match(/lowest height is (\d+)/);
+        if (match) {
+          currentHeight = parseInt(match[1]);
+          console.log("currentHeight", currentHeight);
 
-      await new Promise((resolve) => setTimeout(resolve, 250)); // Rate limit delay
+          continue; // retry from the new lower bound
+        } else {
+          return new Response(
+            JSON.stringify({
+              error: "Failed to fetch/store blocks",
+              message: res.data.error.message,
+              response: res.data.error.data,
+              status: 400,
+            }),
+            { status: 500 }
+          );
+        }
+      }
+
+      const block = {
+        height: currentHeight,
+        hash: res.data.result?.block_id?.hash,
+        time: res.data.result?.block?.header?.time,
+        txs: res.data.result?.block?.data?.txs || [],
+      };
+
+      await client.query(
+        `INSERT INTO blocks (height, hash, time, txs)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (height) DO NOTHING`,
+        [block.height, block.hash, block.time, JSON.stringify(block.txs)]
+      );
+
+      newBlocks.push(block);
+      limit++;
+      currentHeight++;
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
-    return Response.json({ blocks });
+    const latestBlocksRes = await client.query(`
+      SELECT height, hash, time, txs
+      FROM blocks
+      ORDER BY height DESC
+      LIMIT 10
+    `);
+
+    const blocks = latestBlocksRes.rows;
+
+    return Response.json({ blocks, length: blocks.length });
   } catch (err) {
-    console.error("Error fetching blocks:", {
+    console.error("Error fetching/storing blocks:", {
       message: err.message,
       response: err.response?.data,
       status: err.response?.status,
@@ -53,12 +118,14 @@ export async function GET() {
 
     return new Response(
       JSON.stringify({
-        error: "Failed to fetch blocks",
+        error: "Failed to fetch/store blocks",
         message: err.message,
         response: err.response?.data,
         status: err.response?.status,
       }),
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }
