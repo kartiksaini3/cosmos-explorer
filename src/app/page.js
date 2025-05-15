@@ -93,7 +93,9 @@ const FetchLast10 = () => {
               </p>
               <p>
                 <strong>Raw Tx:</strong>{" "}
-                <code className="break-words text-sm">{tx.rawTx}</code>
+                <code className="break-words text-sm">
+                  {tx.rawTx.slice(0, 1000)}
+                </code>
               </p>
             </div>
           ))}
