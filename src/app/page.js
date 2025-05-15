@@ -36,18 +36,20 @@ const FetchLast10 = () => {
       <h1 className="text-2xl font-bold">Cosmos Explorer</h1>
       <div className="flex space-x-4 mb-4">
         <button
-          className={`px-4 py-2 rounded ${
-            activeTab === "blocks" ? "bg-blue-600 text-white" : "bg-gray-200"
+          className={`px-4 py-2 rounded cursor-pointer ${
+            activeTab === "blocks"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-black"
           }`}
           onClick={() => setActiveTab("blocks")}
         >
           Blocks
         </button>
         <button
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded cursor-pointer ${
             activeTab === "transactions"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+              : "bg-gray-200 text-black"
           }`}
           onClick={() => setActiveTab("transactions")}
         >
