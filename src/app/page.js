@@ -21,7 +21,7 @@ const FetchLast10 = () => {
         const res = await axios.get("/api/blocks");
         const data = res?.data;
         setBlocks(data.blocks || []);
-      } else if (activeTab === "txs") {
+      } else if (activeTab === "transactions") {
         const res = await axios.get("/api/txs");
         const data = res?.data;
         setTransactions(data.transactions || []);
