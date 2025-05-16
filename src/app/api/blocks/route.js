@@ -43,7 +43,6 @@ export async function GET() {
       latestHeight - startHeight
     );
 
-    const newBlocks = [];
     let currentHeight = startHeight + 1;
 
     while (currentHeight <= latestHeight) {
@@ -94,7 +93,6 @@ export async function GET() {
         [block.height, block.hash, block.time, JSON.stringify(block.txs)]
       );
 
-      newBlocks.push(block);
       currentHeight++;
 
       await new Promise((resolve) => setTimeout(resolve, 250));

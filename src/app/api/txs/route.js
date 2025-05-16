@@ -99,8 +99,6 @@ export async function GET() {
           rawTx: tx,
           time: blockTime,
         });
-
-        if (newTxs.length === 10) break;
       }
 
       currentHeight++;

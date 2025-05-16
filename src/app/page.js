@@ -176,24 +176,26 @@ const Home = () => {
                   />
                 </code>
               </p>
-              <table>
-                <tr>
-                  <th>Function Name</th>
-                  <th>Payload</th>
-                  <th>From</th>
-                  <th>To</th>
-                </tr>
-                <tr>
-                  {JSON.parse(tx.parsedTx).map((tx) => (
-                    <>
-                      <td>{tx?.funcName}</td>
-                      <td>{tx?.payload}</td>
-                      <td>{tx?.from || "-"}</td>
-                      <td>{tx?.to || "-"}</td>
-                    </>
-                  ))}
-                </tr>
-              </table>
+              <p>
+                <table>
+                  <tr>
+                    <th>Function Name</th>
+                    <th>Payload</th>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
+                  <tr>
+                    {JSON.parse(tx?.parsedTx).map((tx) => (
+                      <>
+                        <td>{tx?.funcName}</td>
+                        <td>{tx?.payload}</td>
+                        <td>{tx?.from || "-"}</td>
+                        <td>{tx?.to || "-"}</td>
+                      </>
+                    ))}
+                  </tr>
+                </table>
+              </p>
             </div>
           ))}
         </div>
