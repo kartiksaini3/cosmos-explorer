@@ -3,6 +3,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Copy from "@/images/copy.svg";
+import Reload from "@/images/reload.svg";
 import { toast } from "react-toastify";
 import Image from "next/image";
 
@@ -12,25 +13,26 @@ const FetchLast10 = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (activeTab === "blocks") {
-          const res = await axios.get("/api/blocks");
-          const data = res?.data;
-          setBlocks(data.blocks || []);
-        } else {
-          const res = await axios.get("/api/txs");
-          const data = res?.data;
-          setTransactions(data.transactions || []);
-        }
-      } catch (err) {
-        console.error("Client error fetching data:", err);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === "blocks") {
+        const res = await axios.get("/api/blocks");
+        const data = res?.data;
+        setBlocks(data.blocks || []);
+      } else {
+        const res = await axios.get("/api/txs");
+        const data = res?.data;
+        setTransactions(data.transactions || []);
       }
-    };
+    } catch (err) {
+      console.error("Client error fetching data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [activeTab]);
 
@@ -67,6 +69,15 @@ const FetchLast10 = () => {
         >
           Transactions
         </button>
+        <Image
+          src={Reload}
+          alt="Reload Icon"
+          width={20}
+          className="cursor-pointer invert"
+          onClick={() => {
+            !loading && fetchData();
+          }}
+        />
       </div>
 
       {loading ? (
