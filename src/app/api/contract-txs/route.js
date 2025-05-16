@@ -110,7 +110,7 @@ export async function GET() {
     }
 
     const latestTxRes = await client.query(`
-      SELECT hash, height, raw_tx AS "rawTx",time, parsed_tx AS parsedTx
+      SELECT hash, height, raw_tx AS "rawTx",time, parsed_tx AS "parsedTx"
       FROM contract_transactions
       ORDER BY height DESC, id DESC
       LIMIT ${ENV.LIMIT}
