@@ -11,6 +11,7 @@ const FetchLast10 = () => {
   const [activeTab, setActiveTab] = useState("blocks");
   const [blocks, setBlocks] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [contractTxs, setContractTxs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -20,10 +21,14 @@ const FetchLast10 = () => {
         const res = await axios.get("/api/blocks");
         const data = res?.data;
         setBlocks(data.blocks || []);
-      } else {
+      } else if (activeTab === "txs") {
         const res = await axios.get("/api/txs");
         const data = res?.data;
         setTransactions(data.transactions || []);
+      } else {
+        const res = await axios.get("/api/contract-txs");
+        const data = res?.data;
+        setContractTxs(data.contractTxs || []);
       }
     } catch (err) {
       console.error("Client error fetching data:", err);
@@ -69,6 +74,16 @@ const FetchLast10 = () => {
         >
           Transactions
         </button>
+        <button
+          className={`px-4 py-2 rounded ${
+            activeTab === "contract transactions"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-black cursor-pointer"
+          }`}
+          onClick={() => setActiveTab("contract transactions")}
+        >
+          Contract Transactions
+        </button>
         <Image
           src={Reload}
           alt="Reload Icon"
@@ -103,32 +118,34 @@ const FetchLast10 = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {transactions.map((tx, index) => (
-            <div key={index} className="p-4 border rounded-xl shadow">
-              <p>
-                <strong>Height:</strong> {tx.height}
-              </p>
-              <p>
-                <strong>Hash:</strong> {tx.hash}
-              </p>
-              <p>
-                <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
-              </p>
-              <p>
-                <strong>Raw Tx:</strong>{" "}
-                <code className="break-words text-sm">
-                  {`${tx.rawTx.slice(0, 1000)}...`}
-                  <Image
-                    src={Copy}
-                    alt="Copy Icon"
-                    width={20}
-                    className="cursor-pointer invert"
-                    onClick={() => handleCopy(tx.rawTx)}
-                  />
-                </code>
-              </p>
-            </div>
-          ))}
+          {(activeTab === "transactions" ? transactions : contractTxs).map(
+            (tx, index) => (
+              <div key={index} className="p-4 border rounded-xl shadow">
+                <p>
+                  <strong>Height:</strong> {tx.height}
+                </p>
+                <p>
+                  <strong>Hash:</strong> {tx.hash}
+                </p>
+                <p>
+                  <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Raw Tx:</strong>{" "}
+                  <code className="break-words text-sm">
+                    {`${tx.rawTx.slice(0, 1000)}...`}
+                    <Image
+                      src={Copy}
+                      alt="Copy Icon"
+                      width={20}
+                      className="cursor-pointer invert"
+                      onClick={() => handleCopy(tx.rawTx)}
+                    />
+                  </code>
+                </p>
+              </div>
+            )
+          )}
         </div>
       )}
     </div>
