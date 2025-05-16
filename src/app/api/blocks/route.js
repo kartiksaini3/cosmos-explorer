@@ -37,10 +37,6 @@ export async function GET() {
     const dbRes = await client.query("SELECT MAX(height) AS max FROM blocks");
     let startHeight = dbRes.rows[0].max;
 
-    // if (startHeight === null) {
-    //   startHeight = latestHeight - 9;
-    // }
-
     const newBlocks = [];
     let limit = 0;
     let currentHeight = startHeight + 1;
