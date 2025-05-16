@@ -176,26 +176,46 @@ const Home = () => {
                   />
                 </code>
               </p>
-              <p>
-                <table>
-                  <tr>
-                    <th>Function Name</th>
-                    <th>Payload</th>
-                    <th>From</th>
-                    <th>To</th>
-                  </tr>
-                  <tr>
-                    {JSON.parse(tx?.parsedTx).map((tx) => (
-                      <>
-                        <td>{tx?.funcName}</td>
-                        <td>{tx?.payload}</td>
-                        <td>{tx?.from || "-"}</td>
-                        <td>{tx?.to || "-"}</td>
-                      </>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm border-collapse border border-gray-300">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        Function Name
+                      </th>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        Payload
+                      </th>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        From
+                      </th>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        To
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {JSON.parse(tx?.parsedTx).map((item, i) => (
+                      <tr key={i}>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.functionName || "-"}
+                        </td>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          <pre className="whitespace-pre-wrap break-words max-w-[300px]">
+                            {JSON.stringify(item?.payload, null, 2)}
+                          </pre>
+                        </td>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.from || "-"}
+                        </td>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.to || "-"}
+                        </td>
+                      </tr>
                     ))}
-                  </tr>
+                  </tbody>
                 </table>
-              </p>
+              </div>
             </div>
           ))}
         </div>
