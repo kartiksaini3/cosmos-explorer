@@ -50,6 +50,7 @@ export async function GET() {
     let currentHeight = startHeight + 1;
 
     while (currentHeight <= latestHeight) {
+      console.log("remaining : contract-txs", latestHeight - currentHeight);
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
