@@ -1,8 +1,25 @@
 import { ENV, HEADERS } from "@/utils/constants";
+import { Pool } from "pg";
 import axios from "axios";
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 export async function GET() {
+  const client = await pool.connect();
+
   try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS contract_transactions (
+        id SERIAL PRIMARY KEY,
+        height INTEGER,
+        hash TEXT,
+        time TIMESTAMPTZ,
+        raw_tx TEXT
+      );
+    `);
+
     const statusRes = await axios.post(
       ENV.RPC_ENDPOINT,
       {
@@ -18,50 +35,92 @@ export async function GET() {
       statusRes.data.result.sync_info.latest_block_height
     );
 
-    const contractTxs = [];
-    let height = latestHeight;
+    const dbRes = await client.query(
+      "SELECT MAX(height) AS max FROM contract_transactions"
+    );
+    let startHeight = dbRes.rows[0].max;
 
-    while (contractTxs.length < 10 && height > 0) {
+    const newTransactions = [];
+    let limit = 0;
+    let currentHeight = startHeight + 1;
+
+    while (currentHeight <= latestHeight && limit < 10) {
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
           jsonrpc: "2.0",
-          id: height,
+          id: currentHeight,
           method: "block",
-          params: { height: String(height) },
+          params: { height: String(currentHeight) },
         },
         { headers: HEADERS }
       );
 
-      const txs = res.data.result.block.data.txs || [];
-
-      for (const tx of txs) {
-        // Decode base64 transaction if needed and inspect for contract types
-        const decodedTx = Buffer.from(tx, "base64").toString("utf-8");
-
-        // Heuristic: check if it includes a contract call
-        if (decodedTx.includes("MsgExecuteContract")) {
-          contractTxs.push({
-            height,
-            hash: res.data.result.block_id.hash,
-            time: res.data.result.block.header.time,
-            rawTx: tx,
-          });
+      if (res.data?.error) {
+        const msg = res.data?.error?.data;
+        const match = msg?.match(/lowest height is (\d+)/);
+        if (match) {
+          currentHeight = parseInt(match[1]);
+          continue;
+        } else {
+          return new Response(
+            JSON.stringify({
+              error: "Failed to fetch/store contract transactions",
+              message: res.data.error.message,
+              response: res.data.error.data,
+              status: 400,
+            }),
+            { status: 500 }
+          );
         }
-
-        if (contractTxs.length === 10) break;
       }
 
-      height--;
+      const txs = res.data.result?.block?.data?.txs || [];
+
+      for (const rawTx of txs) {
+        const isContract = true;
+
+        if (isContract) {
+          await client.query(
+            `INSERT INTO contract_transactions (height, hash, time, raw_tx)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT DO NOTHING`,
+            [
+              currentHeight,
+              res.data.result?.block_id?.hash,
+              res.data.result?.block?.header?.time,
+              rawTx,
+            ]
+          );
+
+          newTransactions.push({
+            height: currentHeight,
+            hash: res.data.result?.block_id?.hash,
+            time: res.data.result?.block?.header?.time,
+            rawTx,
+          });
+
+          limit++;
+          if (limit >= 10) break;
+        }
+      }
+
+      currentHeight++;
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
-    return Response.json({
-      contractTxs,
-      length: contractTxs.length,
-    });
+    const latestTxRes = await client.query(`
+      SELECT height, hash, time, raw_tx
+      FROM contract_transactions
+      ORDER BY height DESC, id DESC
+      LIMIT 10
+    `);
+
+    const contractTxs = latestTxRes.rows;
+
+    return Response.json({ contractTxs, length: contractTxs.length });
   } catch (err) {
-    console.error("Error fetching contract transactions:", {
+    console.error("Error fetching/storing contract transactions:", {
       message: err.message,
       response: err.response?.data,
       status: err.response?.status,
@@ -69,12 +128,14 @@ export async function GET() {
 
     return new Response(
       JSON.stringify({
-        error: "Failed to fetch contract transactions",
+        error: "Failed to fetch/store contract transactions",
         message: err.message,
         response: err.response?.data,
         status: err.response?.status,
       }),
       { status: 500 }
     );
+  } finally {
+    client.release();
   }
 }
