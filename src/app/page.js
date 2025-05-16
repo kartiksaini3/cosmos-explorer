@@ -7,7 +7,7 @@ import Reload from "@/images/reload.svg";
 import { toast } from "react-toastify";
 import Image from "next/image";
 
-const FetchLast10 = () => {
+const Home = () => {
   const [activeTab, setActiveTab] = useState("blocks");
   const [blocks, setBlocks] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -152,4 +152,4 @@ const FetchLast10 = () => {
   );
 };
 
-export default FetchLast10;
+export default Home;
