@@ -39,6 +39,12 @@ export async function GET() {
       "SELECT MAX(height) AS max FROM contract_transactions"
     );
     let startHeight = dbRes.rows[0].max || ENV.STARTING_BLOCK_HEIGHT;
+    console.log(
+      "startHeight_latestHeight_latestHeight-startHeight : contract-txs",
+      startHeight,
+      latestHeight,
+      latestHeight - startHeight
+    );
 
     const newTransactions = [];
     let currentHeight = startHeight + 1;
@@ -109,12 +115,12 @@ export async function GET() {
       SELECT hash, height, raw_tx AS "rawTx",time
       FROM contract_transactions
       ORDER BY height DESC, id DESC
-      LIMIT 10
+      LIMIT ${ENV.LIMIT}
     `);
 
     const contractTxs = latestTxRes.rows;
 
-    return Response.json({ contractTxs, length: contractTxs.length });
+    return Response.json({ contractTxs, count: contractTxs.length });
   } catch (err) {
     console.error("Error fetching/storing contract transactions:", {
       message: err.message,

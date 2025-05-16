@@ -36,6 +36,12 @@ export async function GET() {
 
     const dbRes = await client.query("SELECT MAX(height) AS max FROM blocks");
     let startHeight = dbRes.rows[0].max || ENV.STARTING_BLOCK_HEIGHT;
+    console.log(
+      "startHeight_latestHeight_latestHeight-startHeight : blocks",
+      startHeight,
+      latestHeight,
+      latestHeight - startHeight
+    );
 
     const newBlocks = [];
     let currentHeight = startHeight + 1;
@@ -97,12 +103,12 @@ export async function GET() {
       SELECT height, hash, time, txs
       FROM blocks
       ORDER BY height DESC
-      LIMIT 10
+      LIMIT ${ENV.LIMIT}
     `);
 
     const blocks = latestBlocksRes.rows;
 
-    return Response.json({ blocks, length: blocks.length });
+    return Response.json({ blocks, count: blocks.length });
   } catch (err) {
     console.log("errrrr", err);
 
