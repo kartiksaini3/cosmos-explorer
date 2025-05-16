@@ -17,7 +17,8 @@ export async function GET() {
         height INTEGER,
         hash TEXT,
         time TIMESTAMPTZ,
-        raw_tx TEXT
+        raw_tx TEXT,
+        parsedTx TEXT
       );
     `);
 
@@ -91,14 +92,15 @@ export async function GET() {
 
         if (isContract) {
           await client.query(
-            `INSERT INTO contract_transactions (height, hash, time, raw_tx)
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO contract_transactions (height, hash, time, raw_tx, parsedTx)
+             VALUES ($1, $2, $3, $4, $5)
              ON CONFLICT DO NOTHING`,
             [
               currentHeight,
               res.data.result?.block_id?.hash,
               res.data.result?.block?.header?.time,
               rawTx,
+              JSON.stringify(parsedTx),
             ]
           );
 
@@ -116,7 +118,7 @@ export async function GET() {
     }
 
     const latestTxRes = await client.query(`
-      SELECT hash, height, raw_tx AS "rawTx",time
+      SELECT hash, height, raw_tx AS "rawTx",time, parsedTx
       FROM contract_transactions
       ORDER BY height DESC, id DESC
       LIMIT ${ENV.LIMIT}

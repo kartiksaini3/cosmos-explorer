@@ -50,6 +50,9 @@ const Home = () => {
     }
   };
 
+  const isNoData =
+    !blocks?.length && !transactions?.length && !contractTxs?.length;
+
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Cosmos Explorer</h1>
@@ -97,6 +100,8 @@ const Home = () => {
 
       {loading ? (
         <p>Loading {activeTab}...</p>
+      ) : isNoData ? (
+        <p>No {activeTab}</p>
       ) : activeTab === "blocks" ? (
         <div className="space-y-4">
           {blocks.map((block) => (
@@ -116,36 +121,81 @@ const Home = () => {
             </div>
           ))}
         </div>
+      ) : activeTab === "transactions" ? (
+        <div className="space-y-4">
+          {transactions.map((tx, index) => (
+            <div key={index} className="p-4 border rounded-xl shadow">
+              <p>
+                <strong>Height:</strong> {tx.height}
+              </p>
+              <p>
+                <strong>Hash:</strong> {tx.hash}
+              </p>
+              <p>
+                <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
+              </p>
+              <p>
+                <strong>Raw Tx:</strong>{" "}
+                <code className="break-words text-sm">
+                  {`${tx.rawTx.slice(0, 1000)}...`}
+                  <Image
+                    src={Copy}
+                    alt="Copy Icon"
+                    width={20}
+                    className="cursor-pointer invert"
+                    onClick={() => handleCopy(tx.rawTx)}
+                  />
+                </code>
+              </p>
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="space-y-4">
-          {(activeTab === "transactions" ? transactions : contractTxs).map(
-            (tx, index) => (
-              <div key={index} className="p-4 border rounded-xl shadow">
-                <p>
-                  <strong>Height:</strong> {tx.height}
-                </p>
-                <p>
-                  <strong>Hash:</strong> {tx.hash}
-                </p>
-                <p>
-                  <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Raw Tx:</strong>{" "}
-                  <code className="break-words text-sm">
-                    {`${tx.rawTx.slice(0, 1000)}...`}
-                    <Image
-                      src={Copy}
-                      alt="Copy Icon"
-                      width={20}
-                      className="cursor-pointer invert"
-                      onClick={() => handleCopy(tx.rawTx)}
-                    />
-                  </code>
-                </p>
-              </div>
-            )
-          )}
+          {contractTxs.map((tx, index) => (
+            <div key={index} className="p-4 border rounded-xl shadow">
+              <p>
+                <strong>Height:</strong> {tx.height}
+              </p>
+              <p>
+                <strong>Hash:</strong> {tx.hash}
+              </p>
+              <p>
+                <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
+              </p>
+              <p>
+                <strong>Raw Tx:</strong>{" "}
+                <code className="break-words text-sm">
+                  {`${tx.rawTx.slice(0, 1000)}...`}
+                  <Image
+                    src={Copy}
+                    alt="Copy Icon"
+                    width={20}
+                    className="cursor-pointer invert"
+                    onClick={() => handleCopy(tx.rawTx)}
+                  />
+                </code>
+              </p>
+              <table>
+                <tr>
+                  <th>Function Name</th>
+                  <th>Payload</th>
+                  <th>From</th>
+                  <th>To</th>
+                </tr>
+                <tr>
+                  {JSON.parse(tx.parsedTx).map((tx) => (
+                    <>
+                      <td>{tx?.funcName}</td>
+                      <td>{tx?.payload}</td>
+                      <td>{tx?.from || "-"}</td>
+                      <td>{tx?.to || "-"}</td>
+                    </>
+                  ))}
+                </tr>
+              </table>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -44,19 +44,42 @@ const extractFunctionsFromMsgExecuteContract = (msg) => {
 //     };
 //   }
 // };
+// const decodeEthereumTx = (msg) => {
+//   try {
+//     console.log("msg", msg);
+
+//     const rawBytes = fromBase64(msg);
+//     const tx = ethers.utils.parseTransaction(rawBytes);
+//     return tx;
+//   } catch (err) {
+//     console.error("Failed to decode MsgEthereumTx", err);
+//     return {
+//       method: "MsgEthereumTx",
+//       error: "Failed to decode EVM transaction",
+//       raw: msg,
+//     };
+//   }
+// };
 const decodeEthereumTx = (msg) => {
   try {
-    console.log("msg", msg);
+    const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
+    const functionName = Object.keys(parsed)[0];
+    const payload = parsed[functionName];
+    const from = parsed?.from || payload?.from || "";
+    const to = parsed?.to || payload?.to || "";
 
-    const rawBytes = fromBase64(msg);
-    const tx = ethers.utils.parseTransaction(rawBytes);
-    return tx;
-  } catch (err) {
-    console.error("Failed to decode MsgEthereumTx", err);
     return {
-      method: "MsgEthereumTx",
-      error: "Failed to decode EVM transaction",
-      raw: msg,
+      functionName,
+      payload,
+      from,
+      to,
+    };
+  } catch (e) {
+    return {
+      functionName: "unknown",
+      payload: {},
+      from: undefined,
+      to: undefined,
     };
   }
 };
@@ -114,5 +137,5 @@ export const parseRawTx = (rawTxBase64) => {
     };
   });
 
-  return { messages };
+  return messages;
 };
