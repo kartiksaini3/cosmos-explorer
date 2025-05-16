@@ -35,13 +35,12 @@ export async function GET() {
     );
 
     const dbRes = await client.query("SELECT MAX(height) AS max FROM blocks");
-    let startHeight = dbRes.rows[0].max;
+    let startHeight = dbRes.rows[0].max || ENV.STARTING_BLOCK_HEIGHT;
 
     const newBlocks = [];
-    let limit = 0;
     let currentHeight = startHeight + 1;
 
-    while (currentHeight <= latestHeight && limit < 10) {
+    while (currentHeight <= latestHeight) {
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
@@ -89,7 +88,6 @@ export async function GET() {
       );
 
       newBlocks.push(block);
-      limit++;
       currentHeight++;
 
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -106,6 +104,8 @@ export async function GET() {
 
     return Response.json({ blocks, length: blocks.length });
   } catch (err) {
+    console.log("errrrr", err);
+
     console.error("Error fetching/storing blocks:", {
       message: err.message,
       response: err.response?.data,
