@@ -9,7 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/encoding": "^0.33.1",
+    "@cosmjs/proto-signing": "^0.33.1",
+    "@ethereumjs/tx": "^10.0.0",
+    "@ethereumjs/util": "^10.0.0",
     "axios": "^1.9.0",
+    "ethers": "^6.14.1",
     "next": "15.3.2",
     "pg": "^8.16.0",
     "react": "^19.0.0",

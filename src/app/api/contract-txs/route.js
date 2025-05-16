@@ -1,6 +1,7 @@
 import { ENV, HEADERS } from "@/utils/constants";
 import { Pool } from "pg";
 import axios from "axios";
+import { parseRawTx } from "@/utils/functions";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -85,6 +86,8 @@ export async function GET() {
 
       for (const rawTx of txs) {
         const isContract = true;
+        const parsedTx = parseRawTx(rawTx);
+        console.log("parsedTx", parsedTx);
 
         if (isContract) {
           await client.query(
