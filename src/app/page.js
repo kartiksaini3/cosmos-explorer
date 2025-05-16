@@ -50,20 +50,20 @@ const FetchLast10 = () => {
       <h1 className="text-2xl font-bold">Cosmos Explorer</h1>
       <div className="flex space-x-4 mb-4">
         <button
-          className={`px-4 py-2 rounded cursor-pointer ${
+          className={`px-4 py-2 rounded ${
             activeTab === "blocks"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-black"
+              : "bg-gray-200 text-black cursor-pointer"
           }`}
           onClick={() => setActiveTab("blocks")}
         >
           Blocks
         </button>
         <button
-          className={`px-4 py-2 rounded cursor-pointer ${
+          className={`px-4 py-2 rounded ${
             activeTab === "transactions"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-black"
+              : "bg-gray-200 text-black cursor-pointer"
           }`}
           onClick={() => setActiveTab("transactions")}
         >
@@ -73,7 +73,7 @@ const FetchLast10 = () => {
           src={Reload}
           alt="Reload Icon"
           width={20}
-          className="cursor-pointer invert"
+          className={`${!loading ? "cursor-pointer" : ""} invert`}
           onClick={() => {
             !loading && fetchData();
           }}
