@@ -6,11 +6,14 @@ const decodeEthereumTx = (msg) => {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
     const functionName = Object.keys(parsed)[0];
     const payload = parsed[functionName];
+    const type = msg["@type"] || "";
 
-    return {
-      functionName,
-      payload,
-    };
+    return !type.startsWith("/cosmos.") && !type.startsWith("/ibc.")
+      ? {
+          functionName,
+          payload,
+        }
+      : false;
   } catch (e) {
     return {
       functionName: "unknown",
@@ -29,6 +32,8 @@ export const parseRawTx = (rawTxBase64) => {
     console.error("Failed to decode tx:", err);
     return { messages: [], error: "Invalid raw transaction" };
   }
-  const messages = decoded.body.messages.map((msg) => decodeEthereumTx(msg));
+  const messages = decoded.body.messages
+    .map((msg) => decodeEthereumTx(msg))
+    .filter(Boolean);
   return messages;
 };

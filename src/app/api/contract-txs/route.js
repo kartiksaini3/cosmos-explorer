@@ -94,24 +94,21 @@ export async function GET() {
       const txs = res.data.result?.block?.data?.txs || [];
 
       for (const rawTx of txs) {
-        const isContract = true;
         const parsedTx = parseRawTx(rawTx);
         console.log("parsedTx", parsedTx);
 
-        if (isContract) {
-          await client.query(
-            `INSERT INTO contract_transactions (height, hash, time, raw_tx, parsed_tx)
+        await client.query(
+          `INSERT INTO contract_transactions (height, hash, time, raw_tx, parsed_tx)
              VALUES ($1, $2, $3, $4, $5)
              ON CONFLICT DO NOTHING`,
-            [
-              currentHeight,
-              res.data.result?.block_id?.hash,
-              res.data.result?.block?.header?.time,
-              rawTx,
-              JSON.stringify(parsedTx),
-            ]
-          );
-        }
+          [
+            currentHeight,
+            res.data.result?.block_id?.hash,
+            res.data.result?.block?.header?.time,
+            rawTx,
+            JSON.stringify(parsedTx),
+          ]
+        );
       }
 
       currentHeight++;
