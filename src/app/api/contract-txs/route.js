@@ -122,7 +122,9 @@ export async function GET() {
       LIMIT ${ENV.FETCH_LIMIT}
     `);
 
-    const contractTxs = latestTxRes.rows;
+    const contractTxs = latestTxRes.rows?.filter(
+      (tx) => JSON.parse(tx?.parsedTx)?.length
+    );
 
     return Response.json({ contractTxs, count: contractTxs.length });
   } catch (err) {

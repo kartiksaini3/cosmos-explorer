@@ -6,7 +6,8 @@ const decodeEthereumTx = (msg) => {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
     const functionName = Object.keys(parsed)[0];
     const payload = parsed[functionName];
-    const type = msg["@type"] || "";
+    const type = msg?.typeUrl || "";
+    console.log("type_type", msg, type, parsed);
 
     return !type.startsWith("/cosmos.") && !type.startsWith("/ibc.")
       ? {
