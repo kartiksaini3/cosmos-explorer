@@ -112,7 +112,7 @@ export async function GET() {
       }
 
       currentHeight++;
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      // await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
     const latestTxRes = await client.query(`
