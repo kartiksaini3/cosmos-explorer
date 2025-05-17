@@ -47,9 +47,18 @@ export async function GET() {
 
     const newTxs = [];
     let currentHeight = startHeight + 1;
+    let limit = 0;
 
-    while (currentHeight <= latestHeight) {
-      console.log("remaining : txs", latestHeight - currentHeight);
+    while (
+      currentHeight <= latestHeight &&
+      (ENV.IS_LIMIT_INSERT ? limit < ENV.INSERT_LIMIT_PER_CALL : true)
+    ) {
+      ENV.IS_LIMIT_INSERT && limit++;
+      console.log(
+        "remaining : txs",
+        currentHeight,
+        latestHeight - currentHeight
+      );
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
@@ -109,7 +118,7 @@ export async function GET() {
       SELECT hash, height, raw_tx AS "rawTx", time
       FROM transactions
       ORDER BY height DESC
-      LIMIT ${ENV.LIMIT}
+      LIMIT ${ENV.FETCH_LIMIT}
     `);
 
     const transactions = latestTxsRes.rows;

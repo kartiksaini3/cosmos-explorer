@@ -44,9 +44,18 @@ export async function GET() {
     );
 
     let currentHeight = startHeight + 1;
+    let limit = 0;
 
-    while (currentHeight <= latestHeight) {
-      console.log("remaining : blocks", latestHeight - currentHeight);
+    while (
+      currentHeight <= latestHeight &&
+      (ENV.IS_LIMIT_INSERT ? limit < ENV.INSERT_LIMIT_PER_CALL : true)
+    ) {
+      ENV.IS_LIMIT_INSERT && limit++;
+      console.log(
+        "remaining : blocks",
+        currentHeight,
+        latestHeight - currentHeight
+      );
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
@@ -102,7 +111,7 @@ export async function GET() {
       SELECT height, hash, time, txs
       FROM blocks
       ORDER BY height DESC
-      LIMIT ${ENV.LIMIT}
+      LIMIT ${ENV.FETCH_LIMIT}
     `);
 
     const blocks = latestBlocksRes.rows;

@@ -186,12 +186,12 @@ const Home = () => {
                       <th className="border border-black-300 px-4 py-2 text-left text-black">
                         Payload
                       </th>
-                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                      {/* <th className="border border-black-300 px-4 py-2 text-left text-black">
                         From
                       </th>
                       <th className="border border-black-300 px-4 py-2 text-left text-black">
                         To
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody>
@@ -205,12 +205,12 @@ const Home = () => {
                             {JSON.stringify(item?.payload, null, 2)}
                           </pre>
                         </td>
-                        <td className="border border- text-black-300 px-4 py-2">
+                        {/* <td className="border border- text-black-300 px-4 py-2">
                           {item?.from || "-"}
                         </td>
                         <td className="border border- text-black-300 px-4 py-2">
                           {item?.to || "-"}
-                        </td>
+                        </td> */}
                       </tr>
                     ))}
                   </tbody>

@@ -1,5 +1,6 @@
 import { decodeTxRaw } from "@cosmjs/proto-signing";
 import { fromBase64 } from "@cosmjs/encoding";
+import { TransactionType } from "@ethereumjs/tx";
 // import { TransactionType } from "@ethereumjs/tx";
 // import { Buffer } from "buffer";
 // import { bytesToHex } from "@ethereumjs/util";
@@ -65,16 +66,23 @@ const decodeEthereumTx = (msg) => {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
     const functionName = Object.keys(parsed)[0];
     const payload = parsed[functionName];
-    const from = parsed?.from || payload?.from || "";
-    const to = parsed?.to || payload?.to || "";
+    // const txBytes = msg.value; // msg.data is base64-encoded RLP-encoded Ethereum tx
+    // const rlpDecoded = TransactionType?.fromSerializedData(
+    //   Buffer.from(txBytes, "base64")
+    // );
+    // const from = rlpDecoded.getSenderAddress().toString();
+    // const to = rlpDecoded.to?.toString() || "Contract Creation";
+    // console.log("from_to", from, to);
 
     return {
       functionName,
       payload,
-      from,
-      to,
+      // from,
+      // to,
     };
   } catch (e) {
+    console.log("errrr", e);
+
     return {
       functionName: "unknown",
       payload: {},
@@ -94,47 +102,40 @@ export const parseRawTx = (rawTxBase64) => {
   }
 
   const messages = decoded.body.messages.map((msg) => {
-    const type = msg["@type"] || msg.typeUrl || "unknown";
-    if (type === "/cosmwasm.wasm.v1.MsgExecuteContract") {
-      const { functionName, payload } =
-        extractFunctionsFromMsgExecuteContract(msg);
-      return {
-        method: "MsgExecuteContract",
-        functionName,
-        from: msg.sender,
-        to: msg.contract,
-        payload,
-      };
-    }
+    // const type = msg["@type"] || msg.typeUrl || "unknown";
+    // if (type === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+    //   return decodeEthereumTx(msg);
+    // }
 
-    if (type === "/cosmwasm.wasm.v1.MsgInstantiateContract") {
-      return {
-        method: "MsgInstantiateContract",
-        from: msg.sender,
-        codeId: msg.code_id,
-        label: msg.label,
-        payload: msg.msg || {},
-        funds: msg.funds?.map((f) => `${f.amount} ${f.denom}`) || [],
-      };
-    }
+    // if (type === "/cosmwasm.wasm.v1.MsgInstantiateContract") {
+    //   const payload = parsed[functionName];
+    //   return {
+    //     functionName: "MsgInstantiateContract",
+    //     from: msg.sender,
+    //     codeId: msg.code_id,
+    //     label: msg.label,
+    //     payload: msg.msg || {},
+    //     funds: msg.funds?.map((f) => `${f.amount} ${f.denom}`) || [],
+    //   };
+    // }
 
-    if (type === "/cosmos.bank.v1beta1.MsgSend") {
-      return {
-        method: "MsgSend",
-        from: msg.from_address,
-        to: msg.to_address,
-        amount: msg.amount?.map((a) => `${a.amount} ${a.denom}`) || [],
-      };
-    }
+    // if (type === "/cosmos.bank.v1beta1.MsgSend") {
+    //   return {
+    //     method: "MsgSend",
+    //     from: msg.from_address,
+    //     to: msg.to_address,
+    //     amount: msg.amount?.map((a) => `${a.amount} ${a.denom}`) || [],
+    //   };
+    // }
 
-    if (type === "/ethermint.evm.v1.MsgEthereumTx") {
-      return decodeEthereumTx(msg);
-    }
+    // if (type === "/ethermint.evm.v1.MsgEthereumTx") {
+    return decodeEthereumTx(msg);
+    // }
 
-    return {
-      method: type,
-      raw: msg,
-    };
+    // return {
+    //   method: type,
+    //   raw: msg,
+    // };
   });
 
   return messages;

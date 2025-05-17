@@ -49,9 +49,18 @@ export async function GET() {
     );
 
     let currentHeight = startHeight + 1;
+    let limit = 0;
 
-    while (currentHeight <= latestHeight) {
-      console.log("remaining : contract-txs", latestHeight - currentHeight);
+    while (
+      currentHeight <= latestHeight &&
+      (ENV.IS_LIMIT_INSERT ? limit < ENV.INSERT_LIMIT_PER_CALL : true)
+    ) {
+      ENV.IS_LIMIT_INSERT && limit++;
+      console.log(
+        "remaining : contract-txs",
+        currentHeight,
+        latestHeight - currentHeight
+      );
       const res = await axios.post(
         ENV.RPC_ENDPOINT,
         {
@@ -113,14 +122,14 @@ export async function GET() {
       SELECT hash, height, raw_tx AS "rawTx",time, parsed_tx AS "parsedTx"
       FROM contract_transactions
       ORDER BY height DESC, id DESC
-      LIMIT ${ENV.LIMIT}
+      LIMIT ${ENV.FETCH_LIMIT}
     `);
 
     const contractTxs = latestTxRes.rows;
 
     return Response.json({ contractTxs, count: contractTxs.length });
   } catch (err) {
-    console.error("Error fetching/storing contract transactions:", {
+    console.error("Error fetching/storing contract transactions:", err, {
       message: err.message,
       response: err.response?.data,
       status: err.response?.status,
