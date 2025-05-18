@@ -107,7 +107,7 @@ const Home = () => {
           {blocks.map((block) => (
             <div key={block.height} className="p-4 border rounded-xl shadow">
               <p>
-                <strong>Height:</strong> {block.height}
+                <strong>Block Number:</strong> {block.height}
               </p>
               <p>
                 <strong>Hash:</strong> {block.hash}
@@ -126,7 +126,7 @@ const Home = () => {
           {transactions.map((tx, index) => (
             <div key={index} className="p-4 border rounded-xl shadow">
               <p>
-                <strong>Height:</strong> {tx.height}
+                <strong>Block Number:</strong> {tx.height}
               </p>
               <p>
                 <strong>Hash:</strong> {tx.hash}
@@ -155,7 +155,7 @@ const Home = () => {
           {contractTxs.map((tx, index) => (
             <div key={index} className="p-4 border rounded-xl shadow">
               <p>
-                <strong>Height:</strong> {tx.height}
+                <strong>Block Number:</strong> {tx.height}
               </p>
               <p>
                 <strong>Hash:</strong> {tx.hash}
