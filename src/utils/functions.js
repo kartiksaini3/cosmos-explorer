@@ -9,16 +9,16 @@ const decodeEthereumTx = (msg) => {
     const type = msg?.typeUrl || "";
     console.log("type_type", msg, type, parsed);
 
-    // return !type.startsWith("/cosmos.") && !type.startsWith("/ibc.")
-    //   ? {
-    //       functionName,
-    //       payload,
-    //     }
-    //   : false;
-    return {
-      functionName,
-      payload,
-    };
+    return !type.startsWith("/cosmos.") && !type.startsWith("/ibc.")
+      ? {
+          functionName,
+          payload,
+        }
+      : false;
+    // return {
+    //   functionName,
+    //   payload,
+    // };
   } catch (e) {
     return {
       functionName: "unknown",
