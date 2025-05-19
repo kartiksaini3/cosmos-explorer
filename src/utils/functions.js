@@ -60,10 +60,9 @@ const decodeNativeTx = (msg) => {
     };
   } catch (e) {
     return {
-      functionName: "unknown",
-      payload: {},
       from: undefined,
       to: undefined,
+      amount: undefined,
     };
   }
 };
