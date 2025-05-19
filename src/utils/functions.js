@@ -27,10 +27,6 @@ const decodeEthereumTx = (msg) => {
       functionName,
       payload,
     };
-    // return {
-    //   functionName,
-    //   payload,
-    // };
   } catch (e) {
     console.log("errrr", e);
 
