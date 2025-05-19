@@ -33,8 +33,6 @@ const decodeEthereumTx = (msg) => {
     return {
       functionName: "unknown",
       payload: {},
-      from: undefined,
-      to: undefined,
     };
   }
 };
