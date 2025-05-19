@@ -10,13 +10,14 @@ const decodeEthereumTx = (msg) => {
     const payload = parsed[functionName];
     const type = msg?.typeUrl || "";
     console.log("type_type", msg, type, parsed);
-    const typeMap = {
-      "/ethermint.evm.v1.MsgEthereumTx": MsgEthereumTx,
-    };
+    // const typeMap = {
+    //   "/ethermint.evm.v1.MsgEthereumTx": MsgEthereumTx,
+    // };
     if (
       type.startsWith("/cosmos.") ||
-      type.startsWith("/ibc.") ||
-      !typeMap[type]
+      type.startsWith("/ibc.")
+      // ||
+      // !typeMap[type]
     )
       return false;
     // const decoded = typeMap[type]?.decode(parsed?.value);
