@@ -147,6 +147,38 @@ const Home = () => {
                   />
                 </code>
               </p>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm border-collapse border border-gray-300">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        From
+                      </th>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        To
+                      </th>
+                      <th className="border border-black-300 px-4 py-2 text-left text-black">
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {JSON.parse(tx?.parsedTx).map((item, i) => (
+                      <tr key={i}>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.from || "-"}
+                        </td>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.to || "-"}
+                        </td>
+                        <td className="border border- text-black-300 px-4 py-2">
+                          {item?.amount || "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ))}
         </div>

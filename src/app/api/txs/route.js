@@ -1,6 +1,7 @@
 import { ENV, HEADERS } from "@/utils/constants";
 import { Pool } from "pg";
 import axios from "axios";
+import { parseRawTx } from "@/utils/functions";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -15,6 +16,7 @@ export async function GET() {
         hash TEXT PRIMARY KEY,
         height INTEGER,
         raw_tx TEXT,
+        parsed_tx TEXT,
         time TIMESTAMPTZ
       );
     `);
@@ -94,12 +96,14 @@ export async function GET() {
       const txs = res.data.result.block.data.txs || [];
 
       for (const tx of txs) {
+        const parsedTx = parseRawTx(tx, true);
+        console.log("parsedTx", parsedTx);
         const hash = res.data.result.block_id.hash + "_" + newTxs.length; // pseudo hash to ensure uniqueness
         await client.query(
-          `INSERT INTO transactions (hash, height, raw_tx, time)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO transactions (hash, height, raw_tx, time, parsed_tx)
+           VALUES ($1, $2, $3, $4, $5)
            ON CONFLICT (hash) DO NOTHING`,
-          [hash, height, tx, blockTime]
+          [hash, height, tx, blockTime, JSON.stringify(parsedTx)]
         );
 
         newTxs.push({
@@ -115,13 +119,15 @@ export async function GET() {
     }
 
     const latestTxsRes = await client.query(`
-      SELECT hash, height, raw_tx AS "rawTx", time
+      SELECT hash, height, raw_tx AS "rawTx", time, parsed_tx AS "parsedTx"
       FROM transactions
       ORDER BY height DESC
       LIMIT ${ENV.FETCH_LIMIT}
     `);
 
-    const transactions = latestTxsRes.rows;
+    const transactions = latestTxsRes.rows?.filter(
+      (tx) => JSON.parse(tx?.parsedTx)?.length
+    );
 
     return Response.json({ transactions, count: transactions.length });
   } catch (err) {
