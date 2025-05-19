@@ -123,64 +123,44 @@ const Home = () => {
         </div>
       ) : activeTab === "transactions" ? (
         <div className="space-y-4">
-          {transactions.map((tx, index) => (
-            <div key={index} className="p-4 border rounded-xl shadow">
-              <p>
-                <strong>Block Number:</strong> {tx.height}
-              </p>
-              <p>
-                <strong>Hash:</strong> {tx.hash}
-              </p>
-              <p>
-                <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
-              </p>
-              <p>
-                <strong>Raw Tx:</strong>{" "}
-                <code className="break-words text-sm">
-                  {`${tx.rawTx.slice(0, 1000)}...`}
-                  <Image
-                    src={Copy}
-                    alt="Copy Icon"
-                    width={20}
-                    className="cursor-pointer invert"
-                    onClick={() => handleCopy(tx.rawTx)}
-                  />
-                </code>
-              </p>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm border-collapse border border-gray-300">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-black-300 px-4 py-2 text-left text-black">
-                        From
-                      </th>
-                      <th className="border border-black-300 px-4 py-2 text-left text-black">
-                        To
-                      </th>
-                      <th className="border border-black-300 px-4 py-2 text-left text-black">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {JSON.parse(tx?.parsedTx).map((item, i) => (
-                      <tr key={i}>
-                        <td className="border border- text-black-300 px-4 py-2">
-                          {item?.from || "-"}
-                        </td>
-                        <td className="border border- text-black-300 px-4 py-2">
-                          {item?.to || "-"}
-                        </td>
-                        <td className="border border- text-black-300 px-4 py-2">
-                          {item?.amount || "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {transactions.map((tx, index) => {
+            const parsedTx = JSON.parse(tx?.parsedTx)?.[0];
+            return (
+              <div key={index} className="p-4 border rounded-xl shadow">
+                <p>
+                  <strong>Block Number:</strong> {tx.height}
+                </p>
+                <p>
+                  <strong>Hash:</strong> {tx.hash}
+                </p>
+                <p>
+                  <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
+                </p>
+                <p>
+                  <strong>From:</strong> {parsedTx?.from}
+                </p>
+                <p>
+                  <strong>To:</strong> {parsedTx?.to}
+                </p>
+                <p>
+                  <strong>Amount:</strong> {parsedTx?.amount}
+                </p>
+                <p>
+                  <strong>Raw Tx:</strong>{" "}
+                  <code className="break-words text-sm">
+                    {`${tx.rawTx.slice(0, 1000)}...`}
+                    <Image
+                      src={Copy}
+                      alt="Copy Icon"
+                      width={20}
+                      className="cursor-pointer invert"
+                      onClick={() => handleCopy(tx.rawTx)}
+                    />
+                  </code>
+                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="space-y-4">
