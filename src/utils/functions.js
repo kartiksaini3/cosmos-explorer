@@ -37,7 +37,7 @@ const decodeEthereumTx = (msg) => {
   }
 };
 
-const decodeNativeTx = (msg) => {
+const decodeNativeTx = (msg, fee) => {
   try {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
     const type = msg?.typeUrl || "";
@@ -51,10 +51,12 @@ const decodeNativeTx = (msg) => {
     )
       return false;
     const decoded = typeMap[type]?.decode(parsed?.value);
+
     return {
       from: decoded?.fromAddress,
       to: decoded?.toAddress,
       amount: decoded.amount.map((amt) => `${amt.amount / 10 ** 6} ATOM`),
+      fee,
     };
   } catch (e) {
     return {
@@ -73,8 +75,13 @@ export const parseRawTx = (rawTxBase64, isNativeTxs = false) => {
     console.error("Failed to decode tx:", err);
     return { messages: [], error: "Invalid raw transaction" };
   }
+  const fee = decoded.authInfo.fee.amount.map(
+    (amt) => `${amt.amount / 10 ** 6} ATOM`
+  );
   const messages = decoded.body.messages
-    .map((msg) => (isNativeTxs ? decodeNativeTx(msg) : decodeEthereumTx(msg)))
+    .map((msg) =>
+      isNativeTxs ? decodeNativeTx(msg, fee) : decodeEthereumTx(msg)
+    )
     .filter(Boolean);
   return messages;
 };

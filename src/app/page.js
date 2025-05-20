@@ -146,6 +146,9 @@ const Home = () => {
                   <strong>Amount:</strong> {parsedTx?.amount}
                 </p>
                 <p>
+                  <strong>Fee:</strong> {parsedTx?.fee}
+                </p>
+                {/* <p>
                   <strong>Raw Tx:</strong>{" "}
                   <code className="break-words text-sm">
                     {`${tx.rawTx.slice(0, 1000)}...`}
@@ -157,7 +160,7 @@ const Home = () => {
                       onClick={() => handleCopy(tx.rawTx)}
                     />
                   </code>
-                </p>
+                </p> */}
               </div>
             );
           })}
@@ -175,7 +178,7 @@ const Home = () => {
               <p>
                 <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
               </p>
-              <p>
+              {/* <p>
                 <strong>Raw Tx:</strong>{" "}
                 <code className="break-words text-sm">
                   {`${tx.rawTx.slice(0, 1000)}...`}
@@ -187,7 +190,7 @@ const Home = () => {
                     onClick={() => handleCopy(tx.rawTx)}
                   />
                 </code>
-              </p>
+              </p> */}
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm border-collapse border border-gray-300">
                   <thead className="bg-gray-100">
