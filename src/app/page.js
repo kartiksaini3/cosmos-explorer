@@ -175,10 +175,10 @@ const Home = () => {
               <p>
                 <strong>Block Number:</strong> {tx.height}
               </p>
-              <p>
+              {/* <p>
                 <strong>Hash:</strong>{" "}
                 {toHex(sha256(fromBase64(tx.rawTx))).toUpperCase()}
-              </p>
+              </p> */}
               <p>
                 <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
               </p>
