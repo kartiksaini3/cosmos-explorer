@@ -2,10 +2,12 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Copy from "@/images/copy.svg";
+// import Copy from "@/images/copy.svg";
 import Reload from "@/images/reload.svg";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { fromBase64, toHex } from "@cosmjs/encoding";
+import { sha256 } from "@cosmjs/crypto";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("blocks");
@@ -131,7 +133,8 @@ const Home = () => {
                   <strong>Block Number:</strong> {tx.height}
                 </p>
                 <p>
-                  <strong>Hash:</strong> {tx.hash}
+                  <strong>Hash:</strong>{" "}
+                  {toHex(sha256(fromBase64(tx.rawTx))).toUpperCase()}
                 </p>
                 <p>
                   <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
@@ -173,7 +176,8 @@ const Home = () => {
                 <strong>Block Number:</strong> {tx.height}
               </p>
               <p>
-                <strong>Hash:</strong> {tx.hash}
+                <strong>Hash:</strong>{" "}
+                {toHex(sha256(fromBase64(tx.rawTx))).toUpperCase()}
               </p>
               <p>
                 <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
