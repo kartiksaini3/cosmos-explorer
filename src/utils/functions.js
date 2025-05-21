@@ -61,11 +61,11 @@ const getTo = (decoded) =>
 const getAmountAr = (decoded) => decoded?.amount || [decoded?.token];
 
 const currencies = [
-  { name: "atom", divideByPower: 6 },
-  { name: "osmo", divideByPower: 6 },
-  { name: "usdc", divideByPower: 6 },
-  { name: "swth", divideByPower: 6 },
-  { name: "btc", divideByPower: 8 },
+  { name: "ATOM", divideByPower: 6 },
+  { name: "OSMO", divideByPower: 6 },
+  { name: "USDC", divideByPower: 6 },
+  { name: "SWTH", divideByPower: 6 },
+  { name: "BTC", divideByPower: 8 },
 ];
 
 const resolveIbcDenom = async (denom) => {
@@ -79,9 +79,12 @@ const resolveIbcDenom = async (denom) => {
     const baseDenom = data.denom_trace?.base_denom;
     console.log("baseDenom", baseDenom);
     return (
-      currencies
-        .find(({ name }) => baseDenom?.includes(name))
-        ?.toUpperCase() || { name: "UNIT", divideByPower: 0 }
+      currencies.find(({ name }) =>
+        baseDenom?.includes(name?.toLowerCase())
+      ) || {
+        name: "UNIT",
+        divideByPower: 0,
+      }
     );
   } catch (error) {
     console.error("Error resolving IBC denom:", error);
@@ -125,7 +128,15 @@ const decodeNativeTx = async (msg, fee) => {
     const amount = amountAr
       ? await Promise.all(
           amountAr?.map(async (amt) => {
-            const currency = await resolveIbcDenom(amt?.denom);
+            let currency;
+            try {
+              currency = await resolveIbcDenom(amt?.denom || "");
+            } catch {
+              currency = {
+                name: "UNIT",
+                divideByPower: 0,
+              };
+            }
             console.log("currency", currency);
 
             return `${amt.amount / 10 ** currency?.divideByPower} ${
