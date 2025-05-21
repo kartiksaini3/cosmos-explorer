@@ -60,6 +60,35 @@ const getTo = (decoded) =>
   decoded?.toAddress || decoded?.validatorAddress || decoded?.receiver || "-";
 const getAmountAr = (decoded) => decoded?.amount || [decoded?.token];
 
+const currencies = [
+  { name: "atom", divideByPower: 6 },
+  { name: "osmo", divideByPower: 6 },
+  { name: "usdc", divideByPower: 6 },
+  { name: "swth", divideByPower: 6 },
+  { name: "btc", divideByPower: 8 },
+];
+
+const resolveIbcDenom = async (denom) => {
+  const ibcHash = denom.split("/")[1];
+  const lcdUrl = `https://lcd.osmosis.zone/ibc/apps/transfer/v1/denom_traces/${ibcHash}`;
+
+  try {
+    const res = await fetch(lcdUrl);
+    if (!res.ok) throw new Error(`Failed to fetch denom trace: ${res.status}`);
+    const data = await res.json();
+    const baseDenom = data.denom_trace?.base_denom;
+    console.log("baseDenom", baseDenom);
+    return (
+      currencies
+        .find(({ name }) => baseDenom?.includes(name))
+        ?.toUpperCase() || { name: "UNIT", divideByPower: 0 }
+    );
+  } catch (error) {
+    console.error("Error resolving IBC denom:", error);
+    return denom; // Fallback to raw IBC hash if resolution fails
+  }
+};
+
 const decodeEthereumTx = (msg) => {
   try {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
@@ -85,25 +114,34 @@ const decodeEthereumTx = (msg) => {
   }
 };
 
-const decodeNativeTx = (msg, fee) => {
+const decodeNativeTx = async (msg, fee) => {
   try {
     const parsed = typeof msg === "string" ? JSON.parse(msg) : msg;
     const type = msg?.typeUrl || "";
     console.log("type_type", msg, type, parsed);
     if (!nativeMsgTypeMapping[type]) return false;
     const decoded = nativeMsgTypeMapping[type]?.decode(parsed?.value);
-    console.log("decoded", decoded);
     const amountAr = getAmountAr(decoded);
+    const amount = amountAr
+      ? await Promise.all(
+          amountAr?.map(async (amt) => {
+            const currency = await resolveIbcDenom(amt?.denom);
+            console.log("currency", currency);
+
+            return `${amt.amount / 10 ** currency?.divideByPower} ${
+              !amt?.denom.startsWith("ibc/")
+                ? amt?.denom?.slice(1)?.toUpperCase()
+                : currency?.name
+            }`;
+          })
+        )
+      : "-";
+    console.log("decoded", amount, decoded);
 
     return {
       from: getFrom(decoded),
       to: getTo(decoded),
-      amount: amountAr
-        ? amountAr?.map(
-            (amt) =>
-              `${amt.amount / 10 ** 6} ${amt?.denom?.slice(1)?.toUpperCase()}`
-          )
-        : "-",
+      amount,
       fee: fee || "-",
     };
   } catch (e) {
@@ -117,7 +155,7 @@ const decodeNativeTx = (msg, fee) => {
   }
 };
 
-export const parseRawTx = (rawTxBase64, isNativeTxs = false) => {
+export const parseRawTx = async (rawTxBase64, isNativeTxs = false) => {
   let decoded;
   try {
     decoded = decodeTxRaw(fromBase64(rawTxBase64));
@@ -128,10 +166,12 @@ export const parseRawTx = (rawTxBase64, isNativeTxs = false) => {
   const fee = decoded.authInfo.fee.amount.map(
     (amt) => `${amt.amount / 10 ** 6} ${amt?.denom?.slice(1)?.toUpperCase()}`
   );
-  const messages = decoded.body.messages
-    .map((msg) =>
-      isNativeTxs ? decodeNativeTx(msg, fee) : decodeEthereumTx(msg)
+  const messages = (
+    await Promise.all(
+      decoded.body.messages.map(async (msg) =>
+        isNativeTxs ? await decodeNativeTx(msg, fee) : decodeEthereumTx(msg)
+      )
     )
-    .filter(Boolean);
+  ).filter(Boolean);
   return messages;
 };

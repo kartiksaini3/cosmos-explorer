@@ -96,7 +96,7 @@ export async function GET() {
       const txs = res.data.result.block.data.txs || [];
 
       for (const tx of txs) {
-        const parsedTx = parseRawTx(tx, true);
+        const parsedTx = await parseRawTx(tx, true);
         console.log("parsedTx", parsedTx);
         const hash = res.data.result.block_id.hash + "_" + newTxs.length; // pseudo hash to ensure uniqueness
         await client.query(
