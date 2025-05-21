@@ -173,14 +173,14 @@ const Home = () => {
           {contractTxs.map((tx, index) => (
             <div key={index} className="p-4 border rounded-xl shadow">
               <p>
-                <strong>Block Number:</strong> {tx.height}
+                <strong>Block Number:</strong> {tx?.height}
               </p>
               {/* <p>
                 <strong>Hash:</strong>{" "}
                 {toHex(sha256(fromBase64(tx.rawTx))).toUpperCase()}
               </p> */}
               <p>
-                <strong>Time:</strong> {new Date(tx.time).toLocaleString()}
+                <strong>Time:</strong> {new Date(tx?.time).toLocaleString()}
               </p>
               {/* <p>
                 <strong>Raw Tx:</strong>{" "}
@@ -221,7 +221,7 @@ const Home = () => {
                         </td>
                         <td className="border border- text-black-300 px-4 py-2">
                           <pre className="whitespace-pre-wrap break-words max-w-[300px]">
-                            {JSON.stringify(item?.payload, null, 2)}
+                            {JSON.stringify(item?.payload)}
                           </pre>
                         </td>
                         {/* <td className="border border- text-black-300 px-4 py-2">
