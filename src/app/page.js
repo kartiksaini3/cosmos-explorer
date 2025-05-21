@@ -43,14 +43,14 @@ const Home = () => {
     fetchData();
   }, [activeTab]);
 
-  const handleCopy = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast("Copied to clipboard!", { type: "success" });
-    } catch (err) {
-      toast("Failed to copy", { type: "error" });
-    }
-  };
+  // const handleCopy = async (text) => {
+  //   try {
+  //     await navigator.clipboard.writeText(text);
+  //     toast("Copied to clipboard!", { type: "success" });
+  //   } catch (err) {
+  //     toast("Failed to copy", { type: "error" });
+  //   }
+  // };
 
   const isNoData =
     !blocks?.length && !transactions?.length && !contractTxs?.length;
