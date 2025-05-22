@@ -68,24 +68,24 @@ const currencies = [
   { name: "BTC", divideByPower: 8 },
 ];
 
+const getCurrencyData = (denom) =>
+  currencies.find(({ name }) => denom?.includes(name?.toLowerCase())) || {
+    name: "UNIT",
+    divideByPower: 0,
+  };
+
 const resolveIbcDenom = async (denom) => {
   const ibcHash = denom.split("/")[1];
   const lcdUrl = `https://lcd.osmosis.zone/ibc/apps/transfer/v1/denom_traces/${ibcHash}`;
 
   try {
+    if (!denom.startsWith("ibc/")) return getCurrencyData(denom);
     const res = await fetch(lcdUrl);
     if (!res.ok) throw new Error(`Failed to fetch denom trace: ${res.status}`);
     const data = await res.json();
     const baseDenom = data.denom_trace?.base_denom;
     console.log("baseDenom", baseDenom);
-    return (
-      currencies.find(({ name }) =>
-        baseDenom?.includes(name?.toLowerCase())
-      ) || {
-        name: "UNIT",
-        divideByPower: 0,
-      }
-    );
+    return getCurrencyData(baseDenom);
   } catch (error) {
     console.error("Error resolving IBC denom:", error);
     return denom; // Fallback to raw IBC hash if resolution fails
@@ -138,11 +138,8 @@ const decodeNativeTx = async (msg, fee) => {
               };
             }
             console.log("currency", currency);
-
             return `${amt.amount / 10 ** currency?.divideByPower} ${
-              !amt?.denom.startsWith("ibc/")
-                ? amt?.denom?.slice(1)?.toUpperCase()
-                : currency?.name
+              currency?.name
             }`;
           })
         )
