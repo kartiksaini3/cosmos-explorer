@@ -175,6 +175,9 @@ const Home = () => {
               <p>
                 <strong>Block Number:</strong> {tx?.height}
               </p>
+              <p>
+                <strong>Contract Address:</strong> {tx?.contractAddress}
+              </p>
               {/* <p>
                 <strong>Hash:</strong>{" "}
                 {toHex(sha256(fromBase64(tx.rawTx))).toUpperCase()}

@@ -101,18 +101,19 @@ const decodeEthereumTx = (msg) => {
     console.log("type_type", msg, type, parsed);
     if (!contractMsgTypeMapping[type]) return false;
     const decoded = contractMsgTypeMapping[type]?.decode(parsed?.value);
-    const amountAr = getAmountAr(decoded);
-    console.log("decoded", decoded, amountAr);
+    console.log("decoded", msg, decoded);
 
     return {
+      contractAddress: decoded?.contract,
       functionName,
       payload,
     };
   } catch (e) {
     console.log("errrr-CONTRACT", e);
     return {
-      functionName: "unknown",
-      payload: {},
+      contractAddress: "-",
+      functionName: "-",
+      payload: "-",
     };
   }
 };
