@@ -6,7 +6,3 @@ export const ENV = {
   INSERT_LIMIT_PER_CALL: +process.env.INSERT_LIMIT_PER_CALL,
   IS_LIMIT_INSERT: process.env.IS_LIMIT_INSERT === "true",
 };
-
-export const HEADERS = {
-  "Content-Type": "application/json",
-};

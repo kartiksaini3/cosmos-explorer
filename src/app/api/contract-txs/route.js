@@ -1,4 +1,4 @@
-import { ENV, HEADERS } from "@/utils/constants";
+import { ENV } from "@/utils/constants";
 import { Pool } from "pg";
 import axios from "axios";
 import { parseRawTx } from "@/utils/functions";
@@ -23,16 +23,12 @@ export async function GET() {
       );
     `);
 
-    const statusRes = await axios.post(
-      ENV.RPC_ENDPOINT,
-      {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "status",
-        params: [],
-      },
-      { headers: HEADERS }
-    );
+    const statusRes = await axios.post(ENV.RPC_ENDPOINT, {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "status",
+      params: [],
+    });
 
     const latestHeight = parseInt(
       statusRes.data.result.sync_info.latest_block_height
@@ -62,16 +58,12 @@ export async function GET() {
         currentHeight,
         latestHeight - currentHeight
       );
-      const res = await axios.post(
-        ENV.RPC_ENDPOINT,
-        {
-          jsonrpc: "2.0",
-          id: currentHeight,
-          method: "block",
-          params: { height: String(currentHeight) },
-        },
-        { headers: HEADERS }
-      );
+      const res = await axios.post(ENV.RPC_ENDPOINT, {
+        jsonrpc: "2.0",
+        id: currentHeight,
+        method: "block",
+        params: { height: String(currentHeight) },
+      });
 
       if (res.data?.error) {
         const msg = res.data?.error?.data;
